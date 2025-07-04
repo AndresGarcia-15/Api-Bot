@@ -1,3 +1,5 @@
 fastapi
 uvicorn
 apscheduler
+python-dotenv
+twilio
