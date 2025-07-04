@@ -6,13 +6,12 @@ app.use(express.json());
 let client;
 
 venom
-  .create({
-    session: 'render-bot',
-    multidevice: true,
-    headless: false, // Mostrar el navegador
-    useChrome: true,
-    browserArgs: ['--no-sandbox', '--disable-setuid-sandbox', '--start-maximized']
-  })
+  venom.create({
+  headless: true,
+  useChrome: true,
+  browserArgs: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+})
+
   .then((_client) => {
     client = _client;
     app.listen(3000, () => console.log("✅ Bot WhatsApp escuchando en el puerto 3000"));
