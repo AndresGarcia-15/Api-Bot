@@ -10,7 +10,6 @@ BOT_URL = "https://whatsapp-bot-dutl.onrender.com/send"
 class Reminder(BaseModel):
     phone_number: str
     message: str
-    send_at: str  # Formato: YYYY-MM-DD HH:MM
 
 @app.post("/reminder/")
 def create_reminder(reminder: Reminder):
