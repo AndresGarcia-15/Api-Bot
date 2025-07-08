@@ -9,7 +9,7 @@ venom
   .create({
     session: 'reminder-session',
     multidevice: true,
-    headless: 'new', // Nuevo modo headless
+    headless: 'new',
     useChrome: true,
     folderNameToken: 'tokens',
     mkdirFolderToken: '',
@@ -23,7 +23,6 @@ venom
   .then((_client) => {
     client = _client;
 
-    // Manejo del estado del cliente
     client.onStateChange((state) => {
       console.log('📡 Estado del cliente:', state);
       if (['CONFLICT', 'UNPAIRED', 'UNLAUNCHED'].includes(state)) {
@@ -39,16 +38,42 @@ venom
     console.error('❌ Error al iniciar Venom:', err);
   });
 
-// Endpoint para enviar mensajes
-app.post('/send', (req, res) => {
-  const { phone_number, message } = req.body;
+// ✅ Enviar mensaje a número o grupo
+app.post('/send', async (req, res) => {
+  const { receiver, message } = req.body;
 
   if (!client) {
     return res.status(500).json({ error: 'Cliente WhatsApp no iniciado' });
   }
 
-  client
-    .sendText(`${phone_number}@c.us`, message)
-    .then(() => res.json({ status: 'Mensaje enviado correctamente' }))
-    .catch((err) => res.status(500).json({ error: err.message }));
+  try {
+    const finalId = receiver.includes('@') ? receiver : `${receiver}@c.us`;
+    const result = await client.sendText(finalId, message);
+    res.json({ status: 'Mensaje enviado correctamente' });
+  } catch (err) {
+    console.error('❌ Error al enviar mensaje:', err);
+    res.status(500).json({ error: err.message || 'Error desconocido' });
+  }
+});
+
+// ✅ Obtener lista de grupos
+app.get('/groups', async (req, res) => {
+  if (!client) {
+    return res.status(500).json({ error: 'Cliente WhatsApp no iniciado' });
+  }
+
+  try {
+    const chats = await client.getAllChats();
+    const groups = chats
+      .filter(chat => chat.isGroup)
+      .map(group => ({
+        name: group.name,
+        id: group.id._serialized
+      }));
+
+    res.json(groups);
+  } catch (err) {
+    console.error('❌ Error obteniendo grupos:', err);
+    res.status(500).json({ error: err.message || 'Error desconocido' });
+  }
 });
