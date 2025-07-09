@@ -7,7 +7,6 @@ scheduler.start()
 
 def send_to_whatsapp_bot(phone, message, bot_url):
     try:
-        # Cambiar phone_number por receiver
         response = requests.post(bot_url, json={"receiver": phone, "message": message})
         print("Mensaje enviado:", response.json())
     except Exception as e:

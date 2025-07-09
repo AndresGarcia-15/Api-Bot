@@ -11,9 +11,8 @@ class Reminder(BaseModel):
     phone_number: str
     message: str
 
-# ✅ Nuevo modelo para mensajes a grupos
 class GroupMessage(BaseModel):
-    group_id: str  # ID del grupo (ej: "120363154351234567@g.us")
+    group_id: str  
     message: str
 
 @app.post("/reminder/")
