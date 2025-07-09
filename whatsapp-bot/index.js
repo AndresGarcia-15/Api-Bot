@@ -56,22 +56,34 @@ app.post('/send', async (req, res) => {
   }
 });
 
-// ✅ Obtener lista de grupos
 app.get('/groups', async (req, res) => {
   if (!client) {
     return res.status(500).json({ error: 'Cliente WhatsApp no iniciado' });
   }
 
   try {
+    console.log('🔍 Obteniendo chats...');
     const chats = await client.getAllChats();
-    const groups = chats
-      .filter(chat => chat.isGroup)
-      .map(group => ({
-        name: group.name,
-        id: group.id._serialized
-      }));
+    console.log(`📊 Total de chats encontrados: ${chats.length}`);
+    
+    // Filtrar grupos usando el ID en lugar de isGroup
+    const groups = chats.filter(chat => {
+      // Los IDs de grupos terminan en @g.us
+      const isGroupChat = chat.id._serialized.includes('@g.us');
+      console.log(`Chat: ${chat.name || 'Sin nombre'} - Es grupo: ${isGroupChat} - ID: ${chat.id._serialized}`);
+      return isGroupChat;
+    });
+    
+    console.log(`👥 Grupos encontrados: ${groups.length}`);
+    
+    const groupList = groups.map(group => ({
+      name: group.name || 'Grupo sin nombre',
+      id: group.id._serialized,
+      participantCount: group.participants ? group.participants.length : 0
+    }));
 
-    res.json(groups);
+    console.log('📋 Lista final de grupos:', groupList);
+    res.json(groupList);
   } catch (err) {
     console.error('❌ Error obteniendo grupos:', err);
     res.status(500).json({ error: err.message || 'Error desconocido' });
